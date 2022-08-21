@@ -15,14 +15,20 @@ def dmi (df: pd.DataFrame(), interval: int=3):
     del df['tr_2']
     del df['tr_3']
     df['tr' + str(interval)] = df['tr'].rolling(interval).sum()
-    df['dmi+' + str(interval)] = df['dm+'].rolling(interval).sum()
-    df['dmi-' + str(interval)] = df['dm-'].rolling(interval).sum()
+    df.loc[interval - 1, 'dmi+' + str(interval)] = df.loc[0:interval - 1, 'dm+'].sum()
+    df.loc[interval - 1, 'dmi-' + str(interval)] = df.loc[0:interval - 1, 'dm-'].sum()
+    for i in range(interval, len(df)):
+        df.loc[i, 'dmi+' + str(interval)] = df.loc[i - 1, 'dmi+' + str(interval)] - (df.loc[i - 1, 'dmi+' + str(interval)] / interval) + df.loc[i, 'dm+']
+    for i in range(interval, len(df)):
+        df.loc[i, 'dmi-' + str(interval)] = df.loc[i - 1, 'dmi-' + str(interval)] - (df.loc[i - 1, 'dmi-' + str(interval)] / interval) + df.loc[i, 'dm-']
     df['di+'] = df['dmi+' + str(interval)] / df['tr' + str(interval)] * 100
     df['di-'] = df['dmi-' + str(interval)] / df['tr' + str(interval)] * 100
-    del df['tr']
-    del df['tr' + str(interval)]
+    del df['dm+']
+    del df['dm-']
     del df['dmi+' + str(interval)]
     del df['dmi-' + str(interval)]
-    del df['dm-']
-    del df['dm+']
+    del df['tr']
+    del df['tr' + str(interval)]
+
+
     return df

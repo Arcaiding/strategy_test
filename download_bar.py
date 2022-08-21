@@ -6,5 +6,4 @@ del btc_data_bar['<TIME>']
 del btc_data_bar['<VOL>']
 
 btc_data_bar['<DATE>'] = pd.to_datetime(btc_data_bar['<DATE>'])
-btc_data_bar.index = btc_data_bar['<DATE>']
-del btc_data_bar['<DATE>']
+
