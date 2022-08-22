@@ -7,6 +7,7 @@ btc_adx = bar.btc_data_bar
 df = btc_adx
 dmi = f.dmi(df)
 dmi = pd.DataFrame(dmi)
-dmi.to_csv('проба.csv')
+dmi['back'] = np.where(dmi['di+'] > dmi['di-'], 'green', 'red')
+sma = f.fma(df)
 
-print(dmi)
+print(sma)

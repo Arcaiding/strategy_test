@@ -32,3 +32,15 @@ def dmi (df: pd.DataFrame(), interval: int=3):
 
 
     return df
+
+def sma(df: pd.DataFrame(), interval: int=12):
+    df['sma' + str(interval)] = df['<CLOSE>'].rolling(interval).mean()
+    return df
+
+def fma(df: pd.DataFrame(), interval: int=12):
+    df = sma(df, interval)
+    df['line_red'] = df['sma' + str(interval)] * 1.27
+    df['line_orange'] = df['sma' + str(interval)] * 1.127845
+    df['line_yellow'] = df['sma' + str(interval)] * 0.9
+    df['line_green'] = df['sma' + str(interval)] * 0.8
+    return df

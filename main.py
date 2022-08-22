@@ -1,27 +1,25 @@
-import btc_adx as btc
 import pandas as pd
 import numpy as np
-interval = 3
-df = btc.btc_adx
-df['dm+'] = df['<HIGH>'] - df.shift(1)['<HIGH>']
-df['dm-'] = df.shift(1)['<LOW>'] - df['<LOW>']
-df['dm+'] = np.where((df['dm+'] > df['dm-']) & (df['dm+'] > 0), df['dm+'], 0)
-df['dm-'] = np.where((df['dm-'] > df['dm+']) & (df['dm-'] > 0), df['dm-'], 0)
-df['tr_1'] = df['<HIGH>'] - df['<LOW>']
-df['tr_2'] = df['<HIGH>'] - df.shift(1)['<CLOSE>']
-df['tr_3'] = df['<LOW>'] - df.shift(1)['<CLOSE>']
-df['tr'] = df[['tr_1', 'tr_2', 'tr_3']].max(axis=1)
-del df['tr_1']
-del df['tr_2']
-del df['tr_3']
-df['tr' + str(interval)] = df['tr'].rolling(interval).sum()
-df['dmi+' + str(interval)] = df['dm+'].rolling(interval).sum()
-df['dmi-' +str(interval)] = df['dm-'].rolling(interval).sum()
-df['di+'] = df['dmi+' + str(interval)] / df['tr' + str(interval)] * 100
-df['di-'] = df['dmi-' +str(interval)] / df['tr' + str(interval)] * 100
-del df['tr']
-del df['tr' + str(interval)]
-del df['dmi+' + str(interval)]
-del df['dmi-' +str(interval)]
-del df['dm-']
-del df['dm+']
+import function as f
+import download_bar as bar
+
+df = bar.btc_data_bar
+df = f.dmi(df)
+df['back'] = np.where(df['di+'] > df['di-'], 'green', 'red')
+for i in range(2, len(df)):
+    if df.loc[i, 'back'] == 'green' and df.loc[i - 1, 'back'] == 'red':
+        df.loc[i, 'deal'] = 'long'
+    elif df.loc[i, 'back'] == 'red' and df.loc[i-1, 'back'] == 'green':
+        df.loc[i, 'deal'] = 'short'
+
+df = df[df['deal'].isin(['long', 'short'])]
+df = df.reset_index()
+del df['index']
+for i in range(0, len(df) - 1):
+    if df.loc[i, 'deal'] == 'long' and df.loc[i + 1, 'deal'] == 'short':
+        df.loc[i, 'result'] = df.loc[i + 1, '<CLOSE>'] / df.loc[i, '<CLOSE>']
+    elif df.loc[i, 'deal'] == 'short' and df.loc[i + 1, 'deal'] == 'long':
+        df.loc[i, 'result'] = df.loc[i, '<CLOSE>'] / df.loc[i + 1, '<CLOSE>']
+
+df.to_csv('проба.csv')
+print(df)
